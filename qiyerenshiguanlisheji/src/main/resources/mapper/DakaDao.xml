@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.DakaDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zhigong_id as zhigongId
+        ,a.daka_photo as dakaPhoto
+        ,a.daka_content as dakaContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.DakaView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,zhigong.zhigong_name as zhigongName
+        ,zhigong.zhigong_phone as zhigongPhone
+        ,zhigong.zhigong_id_number as zhigongIdNumber
+        ,zhigong.zhigong_photo as zhigongPhoto
+        ,zhigong.zhigong_email as zhigongEmail
+        ,zhigong.bumen_types as bumenTypes
+        ,zhigong.zhiwei_types as zhiweiTypes
+
+        FROM daka  a
+        left JOIN zhigong zhigong ON a.zhigong_id = zhigong.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.zhigongId != null and params.zhigongId != ''">
+                and (
+                    a.zhigong_id = #{params.zhigongId}
+                )
+            </if>
+            <if test=" params.dakaContent != '' and params.dakaContent != null and params.dakaContent != 'null' ">
+                and a.daka_content like CONCAT('%',#{params.dakaContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断职工的id不为空 -->
+            <if test=" params.zhigongIdNotNull != '' and params.zhigongIdNotNull != null and params.zhigongIdNotNull != 'null' ">
+                and a.zhigong_id IS NOT NULL
+            </if>
+            <if test=" params.zhigongName != '' and params.zhigongName != null and params.zhigongName != 'null' ">
+                and zhigong.zhigong_name like CONCAT('%',#{params.zhigongName},'%')
+            </if>
+            <if test=" params.zhigongPhone != '' and params.zhigongPhone != null and params.zhigongPhone != 'null' ">
+                and zhigong.zhigong_phone like CONCAT('%',#{params.zhigongPhone},'%')
+            </if>
+            <if test=" params.zhigongIdNumber != '' and params.zhigongIdNumber != null and params.zhigongIdNumber != 'null' ">
+                and zhigong.zhigong_id_number like CONCAT('%',#{params.zhigongIdNumber},'%')
+            </if>
+            <if test=" params.zhigongEmail != '' and params.zhigongEmail != null and params.zhigongEmail != 'null' ">
+                and zhigong.zhigong_email like CONCAT('%',#{params.zhigongEmail},'%')
+            </if>
+            <if test="params.bumenTypes != null  and params.bumenTypes != ''">
+                and zhigong.bumen_types = #{params.bumenTypes}
+            </if>
+
+            <if test="params.zhiweiTypes != null  and params.zhiweiTypes != ''">
+                and zhigong.zhiwei_types = #{params.zhiweiTypes}
+            </if>
+
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>

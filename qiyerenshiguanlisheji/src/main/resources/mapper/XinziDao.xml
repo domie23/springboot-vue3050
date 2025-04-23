@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.XinziDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zhigong_id as zhigongId
+        ,a.xinzi_uuid_number as xinziUuidNumber
+        ,a.xinzi_name as xinziName
+        ,a.xinzi_month as xinziMonth
+        ,a.jiben_jine as jibenJine
+        ,a.jiangjin_jine as jiangjinJine
+        ,a.jixiao_jine as jixiaoJine
+        ,a.butie_jine as butieJine
+        ,a.shifa_jine as shifaJine
+        ,a.xinzi_content as xinziContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.XinziView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,zhigong.zhigong_name as zhigongName
+        ,zhigong.zhigong_phone as zhigongPhone
+        ,zhigong.zhigong_id_number as zhigongIdNumber
+        ,zhigong.zhigong_photo as zhigongPhoto
+        ,zhigong.zhigong_email as zhigongEmail
+        ,zhigong.bumen_types as bumenTypes
+        ,zhigong.zhiwei_types as zhiweiTypes
+
+        FROM xinzi  a
+        left JOIN zhigong zhigong ON a.zhigong_id = zhigong.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.zhigongId != null and params.zhigongId != ''">
+                and (
+                    a.zhigong_id = #{params.zhigongId}
+                )
+            </if>
+            <if test=" params.xinziUuidNumber != '' and params.xinziUuidNumber != null and params.xinziUuidNumber != 'null' ">
+                and a.xinzi_uuid_number like CONCAT('%',#{params.xinziUuidNumber},'%')
+            </if>
+            <if test=" params.xinziName != '' and params.xinziName != null and params.xinziName != 'null' ">
+                and a.xinzi_name like CONCAT('%',#{params.xinziName},'%')
+            </if>
+            <if test=" params.xinziMonth != '' and params.xinziMonth != null and params.xinziMonth != 'null' ">
+                and a.xinzi_month like CONCAT('%',#{params.xinziMonth},'%')
+            </if>
+            <if test="params.jibenJineStart != null ">
+                <![CDATA[  and a.jiben_jine >= #{params.jibenJineStart}   ]]>
+            </if>
+            <if test="params.jibenJineEnd != null ">
+                <![CDATA[  and a.jiben_jine <= #{params.jibenJineEnd}   ]]>
+            </if>
+            <if test="params.jiangjinJineStart != null ">
+                <![CDATA[  and a.jiangjin_jine >= #{params.jiangjinJineStart}   ]]>
+            </if>
+            <if test="params.jiangjinJineEnd != null ">
+                <![CDATA[  and a.jiangjin_jine <= #{params.jiangjinJineEnd}   ]]>
+            </if>
+            <if test="params.jixiaoJineStart != null ">
+                <![CDATA[  and a.jixiao_jine >= #{params.jixiaoJineStart}   ]]>
+            </if>
+            <if test="params.jixiaoJineEnd != null ">
+                <![CDATA[  and a.jixiao_jine <= #{params.jixiaoJineEnd}   ]]>
+            </if>
+            <if test="params.butieJineStart != null ">
+                <![CDATA[  and a.butie_jine >= #{params.butieJineStart}   ]]>
+            </if>
+            <if test="params.butieJineEnd != null ">
+                <![CDATA[  and a.butie_jine <= #{params.butieJineEnd}   ]]>
+            </if>
+            <if test="params.shifaJineStart != null ">
+                <![CDATA[  and a.shifa_jine >= #{params.shifaJineStart}   ]]>
+            </if>
+            <if test="params.shifaJineEnd != null ">
+                <![CDATA[  and a.shifa_jine <= #{params.shifaJineEnd}   ]]>
+            </if>
+            <if test=" params.xinziContent != '' and params.xinziContent != null and params.xinziContent != 'null' ">
+                and a.xinzi_content like CONCAT('%',#{params.xinziContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断职工的id不为空 -->
+            <if test=" params.zhigongIdNotNull != '' and params.zhigongIdNotNull != null and params.zhigongIdNotNull != 'null' ">
+                and a.zhigong_id IS NOT NULL
+            </if>
+            <if test=" params.zhigongName != '' and params.zhigongName != null and params.zhigongName != 'null' ">
+                and zhigong.zhigong_name like CONCAT('%',#{params.zhigongName},'%')
+            </if>
+            <if test=" params.zhigongPhone != '' and params.zhigongPhone != null and params.zhigongPhone != 'null' ">
+                and zhigong.zhigong_phone like CONCAT('%',#{params.zhigongPhone},'%')
+            </if>
+            <if test=" params.zhigongIdNumber != '' and params.zhigongIdNumber != null and params.zhigongIdNumber != 'null' ">
+                and zhigong.zhigong_id_number like CONCAT('%',#{params.zhigongIdNumber},'%')
+            </if>
+            <if test=" params.zhigongEmail != '' and params.zhigongEmail != null and params.zhigongEmail != 'null' ">
+                and zhigong.zhigong_email like CONCAT('%',#{params.zhigongEmail},'%')
+            </if>
+            <if test="params.bumenTypes != null  and params.bumenTypes != ''">
+                and zhigong.bumen_types = #{params.bumenTypes}
+            </if>
+
+            <if test="params.zhiweiTypes != null  and params.zhiweiTypes != ''">
+                and zhigong.zhiwei_types = #{params.zhiweiTypes}
+            </if>
+
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>

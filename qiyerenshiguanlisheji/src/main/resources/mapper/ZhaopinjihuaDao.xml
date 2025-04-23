@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhaopinjihuaDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.zhaopinjihua_uuid_name as zhaopinjihuaUuidName
+        ,a.zhaopinjihua_name as zhaopinjihuaName
+        ,a.zhaopinjihua_types as zhaopinjihuaTypes
+        ,a.zhiwei_types as zhiweiTypes
+        ,a.zhaopin_renshu as zhaopinRenshu
+        ,a.zhaopinjihua_content as zhaopinjihuaContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhaopinjihuaView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+
+        FROM zhaopinjihua  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.zhaopinjihuaUuidName != '' and params.zhaopinjihuaUuidName != null and params.zhaopinjihuaUuidName != 'null' ">
+                and a.zhaopinjihua_uuid_name like CONCAT('%',#{params.zhaopinjihuaUuidName},'%')
+            </if>
+            <if test=" params.zhaopinjihuaName != '' and params.zhaopinjihuaName != null and params.zhaopinjihuaName != 'null' ">
+                and a.zhaopinjihua_name like CONCAT('%',#{params.zhaopinjihuaName},'%')
+            </if>
+            <if test="params.zhaopinjihuaTypes != null and params.zhaopinjihuaTypes != ''">
+                and a.zhaopinjihua_types = #{params.zhaopinjihuaTypes}
+            </if>
+            <if test="params.zhiweiTypes != null and params.zhiweiTypes != ''">
+                and a.zhiwei_types = #{params.zhiweiTypes}
+            </if>
+            <if test="params.zhaopinRenshuStart != null and params.zhaopinRenshuStart != ''">
+                <![CDATA[  and a.zhaopin_renshu >= #{params.zhaopinRenshuStart}   ]]>
+            </if>
+            <if test="params.zhaopinRenshuEnd != null and params.zhaopinRenshuEnd != ''">
+                <![CDATA[  and a.zhaopin_renshu <= #{params.zhaopinRenshuEnd}   ]]>
+            </if>
+             <if test="params.zhaopinRenshu != null and params.zhaopinRenshu != ''">
+                and a.zhaopin_renshu = #{params.zhaopinRenshu}
+             </if>
+            <if test=" params.zhaopinjihuaContent != '' and params.zhaopinjihuaContent != null and params.zhaopinjihuaContent != 'null' ">
+                and a.zhaopinjihua_content like CONCAT('%',#{params.zhaopinjihuaContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
